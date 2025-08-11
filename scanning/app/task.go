@@ -70,8 +70,8 @@ func (t *taskService) shaCheckNotChange(communityName, newSha string) bool {
 	}
 
 	oldSha, ok := scanConfigSha[communityName]
+	scanConfigSha[communityName] = newSha
 	if !ok {
-		scanConfigSha[communityName] = newSha
 		return false
 	}
 
