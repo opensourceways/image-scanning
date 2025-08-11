@@ -29,9 +29,9 @@ func Run(cfg *config.Config) {
 		taskService:  taskService,
 	}
 
-	if err := instance.trivyService.InitTrivyEnv(); err != nil {
-		logrus.Fatalf("init trivy env failed: %s", err.Error())
-	}
+	//if err := instance.trivyService.InitTrivyEnv(); err != nil {
+	//	logrus.Fatalf("init trivy env failed: %s", err.Error())
+	//}
 
 	// 程序启动先同步一次任务
 	instance.taskService.GenerateTask()
