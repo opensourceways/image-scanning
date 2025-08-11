@@ -43,7 +43,7 @@ func Run(cfg *config.Config) {
 
 func (s *scanner) addJob() {
 	// 每小时同步一次配置文件，更新扫描任务
-	if _, err := s.job.AddFunc("0 * * * *", s.taskService.GenerateTask); err != nil {
+	if _, err := s.job.AddFunc("55 * * * *", s.taskService.GenerateTask); err != nil {
 		logrus.Fatalf("add cron job [GenerateTask]  failed: %s", err.Error())
 	}
 
