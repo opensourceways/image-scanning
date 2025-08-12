@@ -6,7 +6,7 @@ import (
 	common "github.com/opensourceways/image-scanning/common/config"
 	"github.com/opensourceways/image-scanning/common/infrastructure/postgresql"
 	"github.com/opensourceways/image-scanning/scanning/app"
-	"github.com/opensourceways/image-scanning/scanning/domain/platform"
+	"github.com/opensourceways/image-scanning/scanning/domain"
 	"github.com/opensourceways/image-scanning/utils"
 )
 
@@ -26,9 +26,9 @@ func LoadConfig(path string, cfg *Config, remove bool) error {
 }
 
 type Config struct {
-	Community  []platform.Community `json:"community"`
-	TrivyRepo  app.TrivyRepo        `json:"trivy_repo"`
-	Postgresql postgresql.Config    `json:"postgresql"`
+	Community  []domain.Community `json:"community"`
+	TrivyRepo  app.TrivyRepo      `json:"trivy_repo"`
+	Postgresql postgresql.Config  `json:"postgresql"`
 }
 
 // ConfigItems returns a slice of interface{} containing pointers to the configuration items.

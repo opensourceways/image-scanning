@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/sirupsen/logrus"
 
+	"github.com/opensourceways/image-scanning/scanning/domain"
 	"github.com/opensourceways/image-scanning/scanning/domain/platform"
 	"github.com/opensourceways/image-scanning/scanning/domain/repository"
 	"github.com/opensourceways/image-scanning/scanning/infrastructure/platformimpl"
@@ -18,7 +19,7 @@ type TaskService interface {
 	ExecTask()
 }
 
-func NewTaskService(cs []platform.Community, repo repository.Task) *taskService {
+func NewTaskService(cs []domain.Community, repo repository.Task) *taskService {
 	return &taskService{
 		communities: cs,
 		repo:        repo,
@@ -27,21 +28,29 @@ func NewTaskService(cs []platform.Community, repo repository.Task) *taskService 
 
 type taskService struct {
 	repo        repository.Task
-	communities []platform.Community
+	communities []domain.Community
+}
+
+func (t *taskService) getPlatform(c *domain.Community) platform.Platform {
+	switch c.Platform {
+	case domain.PlatformGitee:
+		return platformimpl.NewGiteeImpl(c)
+	case domain.PlatformGithub:
+		return platformimpl.NewGithubImpl(c)
+	default:
+		return nil
+	}
 }
 
 func (t *taskService) GenerateTask() {
 	for _, c := range t.communities {
-		var ptat platform.Platform
-		if c.IsGiteePlatform() {
-			ptat = platformimpl.NewGiteeImpl(&c)
-		} else {
-			// 如果需要支持其他平台在此处扩展优化
+		plat := t.getPlatform(&c)
+		if plat == nil {
 			logrus.Errorf("unsupported platform %v", c)
 			continue
 		}
 
-		scanConfig, sha, err := ptat.DownloadScanConfig()
+		scanConfig, sha, err := plat.DownloadScanConfig()
 		if err != nil {
 			logrus.Errorf("get scan config of %s failed: %s", c.Name, err.Error())
 			continue
@@ -52,8 +61,8 @@ func (t *taskService) GenerateTask() {
 			continue
 		}
 
-		ptat.SetOutput(scanConfig.Scanner.Global.Output)
-		handler := newCommunityHandler(c, t.repo, ptat)
+		plat.SetOutput(scanConfig.Scanner.Global.Output)
+		handler := newCommunityHandler(c, t.repo, plat)
 		handler.generateTask(scanConfig)
 
 		if len(handlers) == 0 {
