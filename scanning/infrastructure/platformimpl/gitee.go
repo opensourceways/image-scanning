@@ -59,8 +59,9 @@ func (impl *giteeImpl) DownloadScanConfig() (scanConfig domain.ScanConfig, sha s
 
 func (impl *giteeImpl) Upload(content, mdPath string) error {
 	var fileIsNotExist bool
+	repoName := impl.output.GetRepoName()
 	filePath := path.Join(impl.output.Path, mdPath)
-	fileContent, err := impl.client.GetPathContent(impl.community.Name, impl.output.Repo, filePath, "master")
+	fileContent, err := impl.client.GetPathContent(impl.community.Name, repoName, filePath, uploadDefaultBranch)
 	if err != nil {
 		if strings.Contains(err.Error(), "file does not exist") {
 			fileIsNotExist = true
@@ -70,10 +71,10 @@ func (impl *giteeImpl) Upload(content, mdPath string) error {
 	}
 
 	if fileIsNotExist {
-		_, err = impl.client.CreateFile(impl.community.Name, impl.output.Repo,
+		_, err = impl.client.CreateFile(impl.community.Name, repoName,
 			uploadDefaultBranch, filePath, content, uploadDefaultCommitMsg)
 	} else {
-		_, err = impl.client.UpdateFile(impl.community.Name, impl.output.Repo,
+		_, err = impl.client.UpdateFile(impl.community.Name, repoName,
 			uploadDefaultBranch, filePath, content, fileContent.Sha, uploadDefaultCommitMsg)
 	}
 

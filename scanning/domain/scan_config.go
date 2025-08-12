@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 
@@ -77,6 +78,10 @@ type Tag struct {
 	Interval string   `json:"interval"`
 	Arches   []string `json:"arches"`
 	Disable  bool     `json:"disable"`
+}
+
+func (o Output) GetRepoName() string {
+	return path.Base(o.Repo)
 }
 
 func (r Repo) genTask(communityName string, tasks map[string]Task) {
