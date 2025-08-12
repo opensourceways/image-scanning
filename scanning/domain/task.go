@@ -35,7 +35,7 @@ func GenerateTask(communityName string, cfg *ScanConfig) map[string]Task {
 }
 
 func (t *Task) UniqueKey() string {
-	return fmt.Sprintf("%s-%s-%s-%s", t.Registry, t.Namespace, t.Image, t.Tag)
+	return fmt.Sprintf("%s-%s-%s-%s-%s", t.Community, t.Registry, t.Namespace, t.Image, t.Tag)
 }
 
 func (t *Task) UpdateIntervalAndArch(interval int, arch []string) {

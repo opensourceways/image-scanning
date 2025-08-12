@@ -14,7 +14,7 @@ import (
 	"github.com/opensourceways/image-scanning/scanning/domain/repository"
 )
 
-func newCommunityHandler(c platform.Community, repo repository.Task, p platform.Platform) *communityHandler {
+func newCommunityHandler(c domain.Community, repo repository.Task, p platform.Platform) *communityHandler {
 	return &communityHandler{
 		name:     c.Name,
 		repo:     repo,
