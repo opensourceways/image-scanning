@@ -9,17 +9,16 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/opensourceways/image-scanning/scanning/domain"
-	"github.com/opensourceways/image-scanning/scanning/domain/platform"
 )
 
 const (
-	uploadDefaultBranch    = "master"
-	uploadDefaultCommitMsg = "image scanning result"
+	uploadDefaultBranchOfGitee = "master"
+	uploadDefaultCommitMsg     = "image scanning result"
 )
 
-func NewGiteeImpl(c *platform.Community) *giteeImpl {
+func NewGiteeImpl(c *domain.Community) *giteeImpl {
 	giteeClient := client.NewClient(func() []byte {
-		return []byte(c.GiteeToken)
+		return []byte(c.Token)
 	})
 
 	return &giteeImpl{
@@ -31,7 +30,7 @@ func NewGiteeImpl(c *platform.Community) *giteeImpl {
 type giteeImpl struct {
 	client    client.Client
 	output    domain.Output
-	community *platform.Community
+	community *domain.Community
 }
 
 func (impl *giteeImpl) SetOutput(output domain.Output) {
@@ -61,7 +60,7 @@ func (impl *giteeImpl) Upload(content, mdPath string) error {
 	var fileIsNotExist bool
 	repoName := impl.output.GetRepoName()
 	filePath := path.Join(impl.output.Path, mdPath)
-	fileContent, err := impl.client.GetPathContent(impl.community.Name, repoName, filePath, uploadDefaultBranch)
+	fileContent, err := impl.client.GetPathContent(impl.community.Name, repoName, filePath, uploadDefaultBranchOfGitee)
 	if err != nil {
 		if strings.Contains(err.Error(), "file does not exist") {
 			fileIsNotExist = true
@@ -72,10 +71,10 @@ func (impl *giteeImpl) Upload(content, mdPath string) error {
 
 	if fileIsNotExist {
 		_, err = impl.client.CreateFile(impl.community.Name, repoName,
-			uploadDefaultBranch, filePath, content, uploadDefaultCommitMsg)
+			uploadDefaultBranchOfGitee, filePath, content, uploadDefaultCommitMsg)
 	} else {
 		_, err = impl.client.UpdateFile(impl.community.Name, repoName,
-			uploadDefaultBranch, filePath, content, fileContent.Sha, uploadDefaultCommitMsg)
+			uploadDefaultBranchOfGitee, filePath, content, fileContent.Sha, uploadDefaultCommitMsg)
 	}
 
 	return err

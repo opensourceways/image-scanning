@@ -30,6 +30,10 @@ func (impl *taskImpl) Save(task domain.Task) error {
 
 func (impl *taskImpl) Find(task domain.Task) (domain.Task, error) {
 	do := TaskDO{}
+	if task.Community != "" {
+		do.Community = task.Community
+	}
+
 	if task.Registry != nil {
 		do.Registry = task.Registry.String()
 	}
