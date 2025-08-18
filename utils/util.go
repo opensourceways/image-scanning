@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 
 	"sigs.k8s.io/yaml"
@@ -48,4 +51,30 @@ func StringToInterval(s string) (int, error) {
 	}
 
 	return interval, nil
+}
+
+func FileExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+
+	return false, err
+}
+
+func RunCmd(c string, param ...string) (string, error) {
+	var out, stderr bytes.Buffer
+	cmd := exec.Command(c, param...)
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return "", errors.New(stderr.String())
+	} else {
+		return out.String(), nil
+	}
 }
