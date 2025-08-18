@@ -14,7 +14,7 @@ RUN GO111MODULE=on CGO_ENABLED=0 go build -a -o image-scanning .
 FROM openeuler/openeuler:24.03-lts-sp2
 RUN dnf -y update --repo OS --repo update && \
     dnf in -y shadow --repo OS --repo update && \
-    dnf install -y git golang && \
+    dnf install -y git golang docker-ce && \
     dnf remove -y gdb-gdbserver && \
     groupadd -g 1000 image-scanning  && \
     useradd -u 1000 -g image-scanning -s /sbin/nologin -m image-scanning && \
@@ -28,8 +28,9 @@ USER image-scanning
 
 COPY  --chown=image-scanning --from=BUILDER /go/src/github.com/opensourceways/image-scanning/image-scanning /opt/app/image-scanning
 COPY --chown=image-scanning --from=BUILDER /go/src/github.com/opensourceways/image-scanning/script/trivy_env.sh /opt/app/trivy_env.sh
+COPY --chown=image-scanning --from=BUILDER /go/src/github.com/opensourceways/image-scanning/script/save_image.sh /opt/app/save_image.sh
 
-RUN chmod 550 /opt/app/trivy_env.sh
+RUN chmod 550 /opt/app/trivy_env.sh /opt/app/save_image.sh && mkdir images
 
 WORKDIR /opt/app/
 

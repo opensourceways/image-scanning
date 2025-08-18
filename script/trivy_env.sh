@@ -17,6 +17,7 @@ function init() {
   cd trivy-db
   go build -o trivy-db cmd/trivy-db/main.go
   ./trivy-db build --cache-dir ../ --only-update openeuler --output-dir ../db/
+  ./trivy-db build --cache-dir ../ --only-update ubuntu --output-dir ../db/
 
   cd ../trivy
   go build -o trivy cmd/trivy/main.go
@@ -28,6 +29,7 @@ function update() {
   git pull
   cd ../trivy-db
   ./trivy-db build --cache-dir ../ --only-update openeuler --output-dir ../db/
+  ./trivy-db build --cache-dir ../ --only-update ubuntu --output-dir ../db/
 }
 
 case $1 in

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/opensourceways/image-scanning/scanning/domain/primitive"
@@ -55,6 +56,12 @@ func (t *Task) IsNeedToScan() bool {
 
 func (t *Task) ImagePath() string {
 	return fmt.Sprintf("%s/%s/%s:%s", t.Registry, t.Namespace, t.Image, t.Tag)
+}
+
+func (t *Task) LocalImagePath(arch string) string {
+	arch = strings.TrimPrefix(arch, "linux/")
+
+	return fmt.Sprintf("images/%s-%s-%s-%s-%s.tar", t.Registry, t.Namespace, t.Image, t.Tag, arch)
 }
 
 func (t *Task) UpdateLastScanTime() {
