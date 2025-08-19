@@ -104,6 +104,14 @@ func (t *taskService) ExecTask() {
 		return
 	}
 
+	go t.loadTask()
+
+	t.handleTaskConcurrently()
+}
+
+func (t *taskService) loadTask() {
+	defer t.recovery()
+
 	for _, handler := range handlers {
 		tasks, err := handler.repo.FindAll(handler.name)
 		if err != nil {
@@ -119,8 +127,6 @@ func (t *taskService) ExecTask() {
 			t.taskChan <- task
 		}
 	}
-
-	t.handleTaskConcurrently()
 }
 
 func (t *taskService) handleTaskConcurrently() {
@@ -150,6 +156,6 @@ func (t *taskService) handleTaskConcurrently() {
 
 func (t *taskService) recovery() {
 	if r := recover(); r != nil {
-		logrus.Errorf("handle task panic %v", r)
+		logrus.Errorf("exec task panic %v", r)
 	}
 }
