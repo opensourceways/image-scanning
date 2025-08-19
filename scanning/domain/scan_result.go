@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	securityBulletinUrlPrefix = "https://www.openeuler.org/zh/security/security-bulletins/detail/?id="
+	osTypeOpenEuler = "openEuler"
+	osTypeUbuntu    = "ubuntu"
 )
 
 type ScanResult struct {
@@ -38,7 +39,19 @@ type Result struct {
 }
 
 func (r Result) isValid() bool {
-	return r.Class == "os-pkgs" && r.Type == "openEuler"
+	return r.Class == "os-pkgs" && (r.Type == osTypeOpenEuler || r.Type == osTypeUbuntu)
+}
+
+func (r Result) formatVulnerabilityID(id string) string {
+	var prefix string
+	switch r.Type {
+	case osTypeOpenEuler:
+		prefix = "https://www.openeuler.org/zh/security/security-bulletins/detail/?id="
+	case osTypeUbuntu:
+		prefix = "https://ubuntu.com/security/"
+	}
+
+	return fmt.Sprintf("[%s](%s)", id, prefix+id)
 }
 
 type Vulnerability struct {
@@ -50,17 +63,9 @@ type Vulnerability struct {
 	Severity         string `json:"Severity"`
 }
 
-func (v Vulnerability) securityBulletinUrl() string {
-	return securityBulletinUrlPrefix + v.VulnerabilityID
-}
-
-func (v Vulnerability) securityBulletinUrlOfMarkdown() string {
-	return fmt.Sprintf("[%s](%s)", v.VulnerabilityID, v.securityBulletinUrl())
-}
-
 func (r ScanResult) ToMarkdown() string {
 	tableHead :=
-		`|  软件包  | 安全公告 | 严重级别 |  状态  | 安装版本 | 修复版本 |
+		`|  软件包  | 漏洞ID | 严重级别 |  状态  | 安装版本 | 修复版本 |
 | :----- | :-----  | :-----  | :----- | :----- | :----- |`
 
 	rowFormat := `| %s | %s |  %s |  %s |  %s |  %s |`
@@ -74,7 +79,7 @@ func (r ScanResult) ToMarkdown() string {
 		for _, vuln := range result.Vulnerabilities {
 			row := fmt.Sprintf(rowFormat,
 				vuln.PkgName,
-				vuln.securityBulletinUrlOfMarkdown(),
+				result.formatVulnerabilityID(vuln.VulnerabilityID),
 				vuln.Severity,
 				vuln.Status,
 				vuln.InstalledVersion,
@@ -103,7 +108,7 @@ type ArchResult struct {
 func BuildContent(ars map[string]ArchResult) string {
 	content := fmt.Sprintf("# 扫描时间：%s\n", time.Now().Format(time.DateTime))
 	for arch, ar := range ars {
-		content += fmt.Sprintf("--- \n ### 扫描架构：%s \n", arch)
+		content += fmt.Sprintf("\n--- \n ### 扫描架构：%s \n", arch)
 
 		if ar.Err == nil {
 			content += ar.ScanResult.ToMarkdown()

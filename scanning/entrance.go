@@ -20,7 +20,7 @@ type scanner struct {
 
 func Run(cfg *config.Config) {
 	trivyService := app.NewTrivyService(&cfg.TrivyRepo)
-	taskService := app.NewTaskService(cfg.Community, repositoryimpl.NewTaskImpl())
+	taskService := app.NewTaskService(cfg.Community, cfg.Concurrency, repositoryimpl.NewTaskImpl())
 
 	instance = &scanner{
 		job:          cron.New(),

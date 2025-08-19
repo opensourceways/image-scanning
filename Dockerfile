@@ -14,7 +14,7 @@ RUN GO111MODULE=on CGO_ENABLED=0 go build -a -o image-scanning .
 FROM openeuler/openeuler:24.03-lts-sp2
 RUN dnf -y update --repo OS --repo update && \
     dnf in -y shadow --repo OS --repo update && \
-    dnf install -y git golang docker-ce && \
+    dnf install -y git golang && \
     dnf remove -y gdb-gdbserver && \
     groupadd -g 1000 image-scanning  && \
     useradd -u 1000 -g image-scanning -s /sbin/nologin -m image-scanning && \
