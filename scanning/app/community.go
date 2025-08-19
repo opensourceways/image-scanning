@@ -1,10 +1,8 @@
 package app
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
-	"os/exec"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -12,6 +10,12 @@ import (
 	"github.com/opensourceways/image-scanning/scanning/domain"
 	"github.com/opensourceways/image-scanning/scanning/domain/platform"
 	"github.com/opensourceways/image-scanning/scanning/domain/repository"
+	"github.com/opensourceways/image-scanning/utils"
+)
+
+const (
+	trivyCmd        = "./trivy"
+	saveImageScript = "./save_image.sh"
 )
 
 func newCommunityHandler(c domain.Community, repo repository.Task, p platform.Platform) *communityHandler {
@@ -80,6 +84,10 @@ func (h *communityHandler) saveTask(newTask domain.Task) error {
 }
 
 func (h *communityHandler) handleTask(task *domain.Task) error {
+	if err := h.downloadImage(task); err != nil {
+		return err
+	}
+
 	ars := make(map[string]domain.ArchResult, len(task.Arch))
 	for _, arch := range task.Arch {
 		param := []string{
@@ -89,8 +97,7 @@ func (h *communityHandler) handleTask(task *domain.Task) error {
 			"-f", "json",
 			"--scanners", "vuln",
 			"--cache-dir", "./trivy_resource/",
-			"--platform", arch,
-			task.ImagePath(),
+			task.LocalImagePath(arch),
 		}
 
 		ars[arch] = h.handleArch(param)
@@ -99,18 +106,34 @@ func (h *communityHandler) handleTask(task *domain.Task) error {
 	return h.platform.Upload(domain.BuildContent(ars), task.MarkdownPath())
 }
 
+func (h *communityHandler) downloadImage(task *domain.Task) error {
+	for _, arch := range task.Arch {
+		exist, err := utils.FileExists(task.LocalImagePath(arch))
+		if err != nil {
+			return err
+		}
+
+		if exist {
+			continue
+		}
+
+		out, err := utils.RunCmd(saveImageScript, arch, task.ImagePath(), task.LocalImagePath(arch))
+		if err != nil {
+			logrus.Errorf("download image %s failed: out: %s, err:%s", task.ImagePath(), out, err.Error())
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (h *communityHandler) handleArch(param []string) domain.ArchResult {
 	var ar domain.ArchResult
-	var out, stderr bytes.Buffer
-
-	cmd := exec.Command("./trivy", param...)
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-
-	if err := cmd.Run(); err != nil {
-		ar.Err = errors.New(stderr.String())
+	out, err := utils.RunCmd(trivyCmd, param...)
+	if err != nil {
+		ar.Err = err
 	} else {
-		ar.Err = json.Unmarshal(out.Bytes(), &ar.ScanResult)
+		ar.Err = json.Unmarshal([]byte(out), &ar.ScanResult)
 	}
 
 	return ar

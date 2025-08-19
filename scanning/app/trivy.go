@@ -1,9 +1,9 @@
 package app
 
 import (
-	"os/exec"
-
 	"github.com/sirupsen/logrus"
+
+	"github.com/opensourceways/image-scanning/utils"
 )
 
 const (
@@ -26,9 +26,9 @@ type trivyService struct {
 }
 
 func (t *trivyService) InitTrivyEnv() error {
-	cmd := exec.Command(script, "init", t.repo.Trivy, t.repo.TrivyDB, t.repo.VulnList)
-	if out, err := cmd.Output(); err != nil {
-		logrus.Errorf("init trivy env failed: %s,output: %s", err.Error(), string(out))
+	out, err := utils.RunCmd(script, "init", t.repo.Trivy, t.repo.TrivyDB, t.repo.VulnList)
+	if err != nil {
+		logrus.Errorf("init trivy env failed: %s,output: %s", err.Error(), out)
 		return err
 	}
 
@@ -36,8 +36,7 @@ func (t *trivyService) InitTrivyEnv() error {
 }
 
 func (t *trivyService) UpdateTrivyDB() {
-	cmd := exec.Command(script, "update")
-	if out, err := cmd.Output(); err != nil {
-		logrus.Errorf("init trivy env failed: %s,output: %s", err.Error(), string(out))
+	if out, err := utils.RunCmd(script, "update"); err != nil {
+		logrus.Errorf("init trivy env failed: %s,output: %s", err.Error(), out)
 	}
 }
