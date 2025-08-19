@@ -61,7 +61,7 @@ func (t *Task) ImagePath() string {
 func (t *Task) LocalImagePath(arch string) string {
 	arch = strings.TrimPrefix(arch, "linux/")
 
-	return fmt.Sprintf("images/%s-%s-%s-%s-%s.tar", t.Registry, t.Namespace, t.Image, t.Tag, arch)
+	return fmt.Sprintf("images/%s_%s_%s_%s_%s.tar", t.Registry, t.Namespace, t.Image, t.Tag, arch)
 }
 
 func (t *Task) UpdateLastScanTime() {
