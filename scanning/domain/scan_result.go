@@ -65,10 +65,10 @@ type Vulnerability struct {
 
 func (r ScanResult) ToMarkdown() string {
 	tableHead :=
-		`|  软件包  | 漏洞ID | 严重级别 |  状态  | 安装版本 | 修复版本 |
-| :----- | :-----  | :-----  | :----- | :----- | :----- |`
+		`|  序号  |  软件包  | 漏洞ID | 严重级别 |  状态  | 安装版本 | 修复版本 |
+| :----- | :-----  | :-----  | :----- | :----- | :----- | :----- | `
 
-	rowFormat := `| %s | %s |  %s |  %s |  %s |  %s |`
+	rowFormat := `| %d | %s | %s | %s | %s | %s | %s |`
 
 	var tableBody []string
 	for _, result := range r.Results {
@@ -76,8 +76,9 @@ func (r ScanResult) ToMarkdown() string {
 			continue
 		}
 
-		for _, vuln := range result.Vulnerabilities {
+		for i, vuln := range result.Vulnerabilities {
 			row := fmt.Sprintf(rowFormat,
+				i+1,
 				vuln.PkgName,
 				result.formatVulnerabilityID(vuln.VulnerabilityID),
 				vuln.Severity,
