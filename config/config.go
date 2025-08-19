@@ -26,9 +26,10 @@ func LoadConfig(path string, cfg *Config, remove bool) error {
 }
 
 type Config struct {
-	Community  []domain.Community `json:"community"`
-	TrivyRepo  app.TrivyRepo      `json:"trivy_repo"`
-	Postgresql postgresql.Config  `json:"postgresql"`
+	Community   []domain.Community `json:"community"`
+	TrivyRepo   app.TrivyRepo      `json:"trivy_repo"`
+	Postgresql  postgresql.Config  `json:"postgresql"`
+	Concurrency app.Concurrency    `json:"concurrency"`
 }
 
 // ConfigItems returns a slice of interface{} containing pointers to the configuration items.

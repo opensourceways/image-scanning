@@ -19,3 +19,13 @@ func (t *TrivyRepo) SetDefault() {
 		t.VulnList = "https://github.com/aquasecurity/vuln-list.git"
 	}
 }
+
+type Concurrency struct {
+	Num int `json:"num" required:"true"`
+}
+
+func (c *Concurrency) SetDefault() {
+	if c.Num == 0 {
+		c.Num = 10
+	}
+}

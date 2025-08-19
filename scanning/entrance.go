@@ -20,7 +20,7 @@ type scanner struct {
 
 func Run(cfg *config.Config) {
 	trivyService := app.NewTrivyService(&cfg.TrivyRepo)
-	taskService := app.NewTaskService(cfg.Community, repositoryimpl.NewTaskImpl())
+	taskService := app.NewTaskService(cfg.Community, cfg.Concurrency, repositoryimpl.NewTaskImpl())
 
 	instance = &scanner{
 		job:          cron.New(),
@@ -48,12 +48,12 @@ func (s *scanner) addJob() {
 	}
 
 	// 看配置要求调整执行任务的粒度，保证覆盖就可以，一般不会太频繁
-	if _, err := s.job.AddFunc("*/10 * * * *", s.taskService.ExecTask); err != nil {
+	if _, err := s.job.AddFunc("*/30 * * * *", s.taskService.ExecTask); err != nil {
 		logrus.Fatalf("add cron job [ExecTask]  failed: %s", err.Error())
 	}
 
-	// 由于openeuler每周发布一次公告，故每周更新第一次即可
-	if _, err := s.job.AddFunc("0 1 * * 0", s.trivyService.UpdateTrivyDB); err != nil {
+	// 每6小时，trivy的标准周期
+	if _, err := s.job.AddFunc("0 */6 * * *", s.trivyService.UpdateTrivyDB); err != nil {
 		logrus.Fatalf("add cron job [UpdateTrivyDB]  failed: %s", err.Error())
 	}
 }
