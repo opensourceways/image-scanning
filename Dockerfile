@@ -30,7 +30,7 @@ COPY  --chown=image-scanning --from=BUILDER /go/src/github.com/opensourceways/im
 COPY --chown=image-scanning --from=BUILDER /go/src/github.com/opensourceways/image-scanning/script/trivy_env.sh /opt/app/trivy_env.sh
 COPY --chown=image-scanning --from=BUILDER /go/src/github.com/opensourceways/image-scanning/script/save_image.sh /opt/app/save_image.sh
 
-RUN chmod 550 /opt/app/trivy_env.sh /opt/app/save_image.sh && mkdir images
+RUN chmod 550 /opt/app/trivy_env.sh /opt/app/save_image.sh && mkdir /opt/app/images
 
 WORKDIR /opt/app/
 

@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	script = "./trivy_env.sh"
+	script           = "./trivy_env.sh"
+	trivyResourceDir = "./trivy_resource"
 )
 
 type TrivyService interface {
@@ -26,6 +27,15 @@ type trivyService struct {
 }
 
 func (t *trivyService) InitTrivyEnv() error {
+	exist, err := utils.PathExists(trivyResourceDir)
+	if err != nil {
+		return err
+	}
+
+	if exist {
+		return nil
+	}
+
 	out, err := utils.RunCmd(script, "init", t.repo.Trivy, t.repo.TrivyDB, t.repo.VulnList)
 	if err != nil {
 		logrus.Errorf("init trivy env failed: %s,output: %s", err.Error(), out)
@@ -37,6 +47,6 @@ func (t *trivyService) InitTrivyEnv() error {
 
 func (t *trivyService) UpdateTrivyDB() {
 	if out, err := utils.RunCmd(script, "update"); err != nil {
-		logrus.Errorf("init trivy env failed: %s,output: %s", err.Error(), out)
+		logrus.Errorf("update trivy db failed: %s,output: %s", err.Error(), out)
 	}
 }

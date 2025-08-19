@@ -120,7 +120,7 @@ func (h *communityHandler) handleTask(task *domain.Task) error {
 
 func (h *communityHandler) downloadImage(task *domain.Task) error {
 	for _, arch := range task.Arch {
-		exist, err := utils.FileExists(task.LocalImagePath(arch))
+		exist, err := utils.PathExists(task.LocalImagePath(arch))
 		if err != nil {
 			return err
 		}
