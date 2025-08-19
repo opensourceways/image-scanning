@@ -29,6 +29,7 @@ func NewTaskService(cs []domain.Community, repo repository.Task) *taskService {
 type taskService struct {
 	repo        repository.Task
 	communities []domain.Community
+	isRunning   bool
 }
 
 func (t *taskService) getPlatform(c *domain.Community) platform.Platform {
@@ -88,6 +89,13 @@ func (t *taskService) shaCheckNotChange(communityName, newSha string) bool {
 }
 
 func (t *taskService) ExecTask() {
+	// 首次执行任务或者配置文件新增任务时，拉取镜像十分费时，可能会跨越到下次定时任务执行的时间，
+	// 因此检测执行状态，避免重复执行
+	if t.isRunning {
+		return
+	}
+
+	t.isRunning = true
 	for _, handler := range handlers {
 		tasks, err := handler.repo.FindAll(handler.name)
 		if err != nil {
@@ -111,4 +119,6 @@ func (t *taskService) ExecTask() {
 			}
 		}
 	}
+
+	t.isRunning = false
 }
