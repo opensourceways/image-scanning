@@ -37,6 +37,7 @@ func (cfg *Config) ConfigItems() []interface{} {
 	return []interface{}{
 		&cfg.Community,
 		&cfg.TrivyRepo,
+		&cfg.Concurrency,
 	}
 }
 
