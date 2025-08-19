@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"errors"
+	"os"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -57,6 +58,7 @@ func (h *communityHandler) clearOldTasks(newTasks map[string]domain.Task) error 
 	for _, oldTask := range oldTasks {
 		_, ok := newTasks[oldTask.UniqueKey()]
 		if !ok {
+			h.clearLocalImageFile(&oldTask)
 			clearIds = append(clearIds, oldTask.Id)
 		}
 	}
@@ -66,6 +68,15 @@ func (h *communityHandler) clearOldTasks(newTasks map[string]domain.Task) error 
 	}
 
 	return h.repo.DeleteByIds(clearIds)
+}
+
+func (h *communityHandler) clearLocalImageFile(task *domain.Task) {
+	for _, arch := range task.Arch {
+		localPath := task.LocalImagePath(arch)
+		if err := os.Remove(localPath); err != nil {
+			logrus.Errorf("remove local image %s failed: %s", localPath, err.Error())
+		}
+	}
 }
 
 func (h *communityHandler) saveTask(newTask domain.Task) error {
@@ -97,6 +108,7 @@ func (h *communityHandler) handleTask(task *domain.Task) error {
 			"-f", "json",
 			"--scanners", "vuln",
 			"--cache-dir", "./trivy_resource/",
+			"--input",
 			task.LocalImagePath(arch),
 		}
 
