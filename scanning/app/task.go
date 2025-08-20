@@ -1,6 +1,8 @@
 package app
 
 import (
+	"os"
+	"path"
 	"sync"
 
 	"github.com/sirupsen/logrus"
@@ -19,6 +21,7 @@ var (
 type TaskService interface {
 	GenerateTask()
 	ExecTask()
+	ClearImages()
 }
 
 func NewTaskService(cs []domain.Community, con Concurrency, repo repository.Task) *taskService {
@@ -157,5 +160,24 @@ func (t *taskService) handleTaskConcurrently() {
 func (t *taskService) recovery() {
 	if r := recover(); r != nil {
 		logrus.Errorf("exec task panic %v", r)
+	}
+}
+
+func (t *taskService) ClearImages() {
+	entry, err := os.ReadDir(domain.ImagesDir)
+	if err != nil {
+		logrus.Errorf("read dir %s failed: %s", domain.ImagesDir, err.Error())
+		return
+	}
+
+	for _, e := range entry {
+		if e.IsDir() {
+			continue
+		}
+
+		filePath := path.Join(domain.ImagesDir, e.Name())
+		if err = os.Remove(filePath); err != nil {
+			logrus.Errorf("remove file %s err: %s", filePath, err.Error())
+		}
 	}
 }

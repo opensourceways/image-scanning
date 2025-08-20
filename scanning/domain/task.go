@@ -8,6 +8,10 @@ import (
 	"github.com/opensourceways/image-scanning/scanning/domain/primitive"
 )
 
+const (
+	ImagesDir = "images"
+)
+
 type Task struct {
 	Id           int64
 	Community    string
@@ -61,7 +65,7 @@ func (t *Task) ImagePath() string {
 func (t *Task) LocalImagePath(arch string) string {
 	arch = strings.TrimPrefix(arch, "linux/")
 
-	return fmt.Sprintf("images/%s_%s_%s_%s_%s.tar", t.Registry, t.Namespace, t.Image, t.Tag, arch)
+	return fmt.Sprintf("%s/%s_%s_%s_%s_%s.tar", ImagesDir, t.Registry, t.Namespace, t.Image, t.Tag, arch)
 }
 
 func (t *Task) UpdateLastScanTime() {

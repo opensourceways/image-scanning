@@ -56,4 +56,9 @@ func (s *scanner) addJob() {
 	if _, err := s.job.AddFunc("0 */6 * * *", s.trivyService.UpdateTrivyDB); err != nil {
 		logrus.Fatalf("add cron job [UpdateTrivyDB]  failed: %s", err.Error())
 	}
+
+	// 镜像站的镜像会按照月级更新，定期清理重新拉取
+	if _, err := s.job.AddFunc("0 0 1 * *", s.taskService.ClearImages); err != nil {
+		logrus.Fatalf("add cron job [ClearImages]  failed: %s", err.Error())
+	}
 }
