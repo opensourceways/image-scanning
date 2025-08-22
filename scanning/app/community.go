@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -15,8 +16,8 @@ import (
 )
 
 const (
-	trivyCmd        = "./trivy"
-	saveImageScript = "./save_image.sh"
+	trivyCmd = "./trivy"
+	skopeo   = "skopeo"
 )
 
 func newCommunityHandler(c domain.Community, repo repository.Task, p platform.Platform) *communityHandler {
@@ -71,9 +72,9 @@ func (h *communityHandler) clearOldTasks(newTasks map[string]domain.Task) error 
 }
 
 func (h *communityHandler) clearLocalImageFile(task *domain.Task) {
-	for _, arch := range task.Arch {
+	for _, arch := range task.FormatArch() {
 		localPath := task.LocalImagePath(arch)
-		if err := os.Remove(localPath); err != nil {
+		if err := os.RemoveAll(localPath); err != nil {
 			logrus.Errorf("remove local image %s failed: %s", localPath, err.Error())
 		}
 	}
@@ -100,7 +101,7 @@ func (h *communityHandler) handleTask(task *domain.Task) error {
 	}
 
 	ars := make(map[string]domain.ArchResult, len(task.Arch))
-	for _, arch := range task.Arch {
+	for _, arch := range task.FormatArch() {
 		param := []string{
 			"image",
 			"--quiet",
@@ -119,7 +120,7 @@ func (h *communityHandler) handleTask(task *domain.Task) error {
 }
 
 func (h *communityHandler) downloadImage(task *domain.Task) error {
-	for _, arch := range task.Arch {
+	for _, arch := range task.FormatArch() {
 		exist, err := utils.PathExists(task.LocalImagePath(arch))
 		if err != nil {
 			return err
@@ -129,7 +130,12 @@ func (h *communityHandler) downloadImage(task *domain.Task) error {
 			continue
 		}
 
-		out, err := utils.RunCmd(saveImageScript, arch, task.ImagePath(), task.LocalImagePath(arch))
+		out, err := utils.RunCmd(skopeo,
+			"copy",
+			"--override-arch", arch,
+			fmt.Sprintf("docker://%s", task.ImagePath()),
+			fmt.Sprintf("oci:./%s", task.LocalImagePath(arch)),
+		)
 		if err != nil {
 			logrus.Errorf("download image %s failed: out: %s, err:%s", task.ImagePath(), out, err.Error())
 			return err

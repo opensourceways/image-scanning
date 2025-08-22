@@ -176,7 +176,7 @@ func (t *taskService) ClearImages() {
 		}
 
 		filePath := path.Join(domain.ImagesDir, e.Name())
-		if err = os.Remove(filePath); err != nil {
+		if err = os.RemoveAll(filePath); err != nil {
 			logrus.Errorf("remove file %s err: %s", filePath, err.Error())
 		}
 	}

@@ -63,9 +63,7 @@ func (t *Task) ImagePath() string {
 }
 
 func (t *Task) LocalImagePath(arch string) string {
-	arch = strings.TrimPrefix(arch, "linux/")
-
-	return fmt.Sprintf("%s/%s_%s_%s_%s_%s.tar", ImagesDir, t.Registry, t.Namespace, t.Image, t.Tag, arch)
+	return fmt.Sprintf("%s/%s_%s_%s_%s_%s", ImagesDir, t.Registry, t.Namespace, t.Image, t.Tag, arch)
 }
 
 func (t *Task) UpdateLastScanTime() {
@@ -74,4 +72,13 @@ func (t *Task) UpdateLastScanTime() {
 
 func (t *Task) MarkdownPath() string {
 	return fmt.Sprintf("%s/%s/%s/%s.md", t.Registry, t.Namespace, t.Image, t.Tag)
+}
+
+func (t *Task) FormatArch() []string {
+	var formatArch []string
+	for _, v := range t.Arch {
+		formatArch = append(formatArch, strings.TrimPrefix(v, "linux/"))
+	}
+
+	return formatArch
 }
