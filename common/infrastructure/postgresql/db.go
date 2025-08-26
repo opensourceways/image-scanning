@@ -34,6 +34,8 @@ var serverLogger = logger.New(
 
 // Init initializes the database connection and configuration.
 func Init(cfg *Config, removeCfg bool) error {
+	defer cfg.clear()
+
 	dbInstance, err := gorm.Open(
 		postgres.New(postgres.Config{
 			DSN: cfg.dsn(),

@@ -25,17 +25,17 @@ type Config struct {
 }
 
 // SetDefault sets the default values for the Config.
-func (p *Config) SetDefault() {
-	if p.MaxConn <= 0 {
-		p.MaxConn = 500
+func (cfg *Config) SetDefault() {
+	if cfg.MaxConn <= 0 {
+		cfg.MaxConn = 500
 	}
 
-	if p.MaxIdle <= 0 {
-		p.MaxIdle = 250
+	if cfg.MaxIdle <= 0 {
+		cfg.MaxIdle = 250
 	}
 
-	if p.Life <= 0 {
-		p.Life = 2
+	if cfg.Life <= 0 {
+		cfg.Life = 2
 	}
 }
 
@@ -50,18 +50,25 @@ func (cfg *Config) getLifeDuration() time.Duration {
 	return time.Minute * time.Duration(cfg.Life)
 }
 
-func (p *Config) dsn() string {
-	if p.Dbcert != "" {
+func (cfg *Config) dsn() string {
+	if cfg.Dbcert != "" {
 		return fmt.Sprintf(
 			"host=%v user=%v password=%v dbname=%v port=%v sslmode=verify-ca TimeZone=Asia/Shanghai sslrootcert=%v",
-			p.Host, p.User, p.Pwd, p.Name, p.Port, p.Dbcert,
+			cfg.Host, cfg.User, cfg.Pwd, cfg.Name, cfg.Port, cfg.Dbcert,
 		)
 	} else {
 		return fmt.Sprintf(
 			"host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=Asia/Shanghai",
-			p.Host, p.User, p.Pwd, p.Name, p.Port,
+			cfg.Host, cfg.User, cfg.Pwd, cfg.Name, cfg.Port,
 		)
 	}
+}
+
+func (cfg *Config) clear() {
+	cfg.Host = ""
+	cfg.User = ""
+	cfg.Pwd = ""
+	cfg.Name = ""
 }
 
 type errorCode struct {
