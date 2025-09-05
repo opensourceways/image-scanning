@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -112,4 +113,11 @@ func main() {
 	}
 
 	scanning.Run(cfg)
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "i am ok")
+	})
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		panic(err)
+	}
 }
