@@ -38,7 +38,7 @@ func Run(cfg *config.Config) {
 
 	instance.addJob()
 
-	instance.job.Start()
+	instance.job.Run()
 }
 
 func (s *scanner) addJob() {

@@ -112,8 +112,12 @@ func main() {
 		return
 	}
 
-	scanning.Run(cfg)
+	go healthCheck()
 
+	scanning.Run(cfg)
+}
+
+func healthCheck() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "i am ok")
 	})
