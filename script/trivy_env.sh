@@ -1,12 +1,11 @@
 #!/bin/bash
 set -e
 
-trivy_resource_dir=trivy_resource
-
 function init() {
-  trivy=$1
-  trivy_db=$2
-  vuln_list=$3
+  trivy_resource_dir=$1
+  trivy=$2
+  trivy_db=$3
+  vuln_list=$4
 
   mkdir -p ${trivy_resource_dir} && cd ${trivy_resource_dir}
 
@@ -20,7 +19,6 @@ function init() {
 
   cd ../trivy
   go build -o trivy cmd/trivy/main.go
-  cp trivy ../../
 }
 
 function build_db() {
@@ -29,6 +27,7 @@ function build_db() {
 }
 
 function update() {
+  trivy_resource_dir=$1
   cd ${trivy_resource_dir}/vuln-list
   git pull
   cd ../trivy-db
@@ -37,10 +36,10 @@ function update() {
 
 case $1 in
   init)
-    init $2 $3 $4
+    init $2 $3 $4 $5
     ;;
   update)
-    update
+    update $2
     ;;
   *)
     echo "Usage: $0 {init|update}"

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	ImagesDir = "images"
+	ImagesDir = "persistent/images"
 )
 
 type Task struct {

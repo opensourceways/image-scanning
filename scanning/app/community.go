@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	trivyCmd = "./trivy"
+	trivyCmd = trivyResourceDir + "trivy/trivy"
 	skopeo   = "skopeo"
 )
 
@@ -108,7 +108,7 @@ func (h *communityHandler) handleTask(task *domain.Task) error {
 			"--skip-db-update",
 			"-f", "json",
 			"--scanners", "vuln",
-			"--cache-dir", "./trivy_resource/",
+			"--cache-dir", trivyResourceDir,
 			"--input",
 			task.LocalImagePath(arch),
 		}

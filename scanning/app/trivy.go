@@ -8,7 +8,7 @@ import (
 
 const (
 	script           = "./trivy_env.sh"
-	trivyResourceDir = "./trivy_resource"
+	trivyResourceDir = "persistent/trivy_resource/"
 )
 
 type TrivyService interface {
@@ -36,7 +36,7 @@ func (t *trivyService) InitTrivyEnv() error {
 		return nil
 	}
 
-	out, err := utils.RunCmd(script, "init", t.repo.Trivy, t.repo.TrivyDB, t.repo.VulnList)
+	out, err := utils.RunCmd(script, "init", trivyResourceDir, t.repo.Trivy, t.repo.TrivyDB, t.repo.VulnList)
 	if err != nil {
 		logrus.Errorf("init trivy env failed: %s,output: %s", err.Error(), out)
 		return err
@@ -46,7 +46,7 @@ func (t *trivyService) InitTrivyEnv() error {
 }
 
 func (t *trivyService) UpdateTrivyDB() {
-	if out, err := utils.RunCmd(script, "update"); err != nil {
+	if out, err := utils.RunCmd(script, "update", trivyResourceDir); err != nil {
 		logrus.Errorf("update trivy db failed: %s,output: %s", err.Error(), out)
 	}
 }
