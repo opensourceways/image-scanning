@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	ImagesDir = "images"
+	ImagesDir = "persistent/images"
 )
 
 type Task struct {
@@ -55,7 +55,7 @@ func (t *Task) IsNeedToScan() bool {
 
 	nextScanTime := t.LastScanTime.Add(time.Second * time.Duration(t.Interval))
 
-	return time.Now().After(nextScanTime)
+	return time.Now().Unix() >= nextScanTime.Unix()
 }
 
 func (t *Task) ImagePath() string {

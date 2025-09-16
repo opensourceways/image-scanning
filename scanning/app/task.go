@@ -143,14 +143,14 @@ func (t *taskService) handleTaskConcurrently() {
 					continue
 				}
 
-				if err := handler.handleTask(&task); err != nil {
-					logrus.Errorf("handle task %s failed: %s", task.UniqueKey(), err.Error())
-					continue
-				}
-
+				// 提前写入时间，防止扫描时间不停的向后偏移
 				task.UpdateLastScanTime()
 				if err := handler.repo.Save(task); err != nil {
 					logrus.Errorf("save task %s when exec failed: %s", task.UniqueKey(), err.Error())
+				}
+
+				if err := handler.handleTask(&task); err != nil {
+					logrus.Errorf("handle task %s failed: %s", task.UniqueKey(), err.Error())
 				}
 			}
 		}()
@@ -171,10 +171,6 @@ func (t *taskService) ClearImages() {
 	}
 
 	for _, e := range entry {
-		if e.IsDir() {
-			continue
-		}
-
 		filePath := path.Join(domain.ImagesDir, e.Name())
 		if err = os.RemoveAll(filePath); err != nil {
 			logrus.Errorf("remove file %s err: %s", filePath, err.Error())

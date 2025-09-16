@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	uploadDefaultBranchOfGithub = "main"
+	uploadDefaultBranchOfGithub = "cves"
 )
 
 func NewGithubImpl(c *domain.Community) *githubImpl {

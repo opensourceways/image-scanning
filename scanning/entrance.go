@@ -48,7 +48,7 @@ func (s *scanner) addJob() {
 	}
 
 	// 看配置要求调整执行任务的粒度，保证覆盖就可以，一般不会太频繁
-	if _, err := s.job.AddFunc("*/30 * * * *", s.taskService.ExecTask); err != nil {
+	if _, err := s.job.AddFunc("*/1 * * * *", s.taskService.ExecTask); err != nil {
 		logrus.Fatalf("add cron job [ExecTask]  failed: %s", err.Error())
 	}
 
